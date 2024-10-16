@@ -32,14 +32,16 @@ async function test(urlPage) {
 
     const listChapter = await getAllChapter(urlPage, page);
 
-    for (var chapterUrl in listChapter){
-        var nb = await getPageNumber(page, listChapter[chapterUrl]);
+    for (var chapterUrlIndex in listChapter){
+        var nb = await getPageNumber(page, listChapter[chapterUrlIndex]);
+        var img = await getAllPages(page, listChapter[chapterUrlIndex],nb);
     }
 }
 
 test("https://sushiscan.net/catalogue/my-hero-academia/");
 
 async function getPageNumber(page, chapterUrl) {
+    // console.log(chapterUrl);
     await page.goto(chapterUrl, { waitUntil: "networkidle2" });
     const pagesListView = await page.$$('#select-paged option');
 
@@ -52,15 +54,33 @@ async function getPageNumber(page, chapterUrl) {
     return nb;
 }
 
-async function getPage(page) {
+async function getAllPages(page,chapUrl,nbPages) {
     const img = await page.$('#readerarea img');
     const imgText = await page.evaluate(img => img.src, img);
+    const re = /(\d+)\./;
+    for (var i = 1; i <=nbPages ; i++){
+        i = addZeros(i);
+        const newImgText = imgText.replace(re, (match, p1) => {
+        // p1 est le premier groupe capturé (le nombre)
+        return `${i}.`;
+        });
+        console.log(newImgText);
+    }
     return imgText;
+}
+
+function addZeros(nb){
+    if (nb <10)
+        return `00${nb}`;
+    if (nb >= 10 && nb < 100)
+        return `0${nb}`;
+    else
+        return nb;
 }
 
 async function getAllChapter(urlPage, page) {
     await page.goto(urlPage, { waitUntil: "networkidle2" });
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 1500));
     var listUrlChapter = [];
 
     const listChapElement = await page.$$('#chapterlist ul li');
