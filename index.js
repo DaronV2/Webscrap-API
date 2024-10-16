@@ -1,4 +1,3 @@
-// const puppeteer = require('puppeteer-extra');
 const { connect } = require('puppeteer-real-browser');
 
 const start = async () => {
@@ -6,7 +5,7 @@ const start = async () => {
 }
 
 
-async function test() {
+async function test(urlPage) {
 
     const { browser, page } = await connect({
 
@@ -31,58 +30,44 @@ async function test() {
 
     });
 
-    await page.goto('https://sushiscan.net/my-hero-academia-volume-1/', { waitUntil: "networkidle2" });
+    const listChapter = await getAllChapter(urlPage, page);
 
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    await page.screenshot({ path: 'screenshot.png' });
-
-    // const pageHTML = await page.content();
-
-    // console.log(pageHTML);
-
-    const element = await page.$('#readerarea');
-    const img = await element.$('img');
-
-    const imgText = await page.evaluate(img => img.src, img);
-    console.log(imgText);
-
-    // if (element) {
-    //     const srcValue = await element.getAttribute('src');
-    //     console.log('SRC:', srcValue);
-    // } else {
-    //     console.log('Element not found');
-    // }
-
-    // const elementText = await page.evaluate(element => element.textContent, element);
-    // console.log('Extracted element:', elementText);
-
-    // console.log(elements);
-
-
-    // return pageHTML;
-
-    // const pctures = await page.evaluate(() => {
-    //     try {
-    //         const pic = document.querySelector('#readerarea');
-    //         return body;
-    //     } catch (e) {
-    //         return e;
-    //     }
-    //     // return pic;
-    // });
-
-    // console.log(pctures);
-
-    // await page.waitForSelector('#readerarea');
-
-    // // Extracting the rendered HTML of a specific section using JavaScript evaluation
-    // const renderedHTML = await page.evaluate(() => {
-    //     const dynamicElement = document.querySelector('#readerarea');
-    //     return dynamicElement ? dynamicElement.innerHTML : 'Element not found';
-    // });
-
-    // return renderedHTML;
+    for (var chapterUrl in listChapter){
+        var nb = await getPageNumber(page, listChapter[chapterUrl]);
+    }
 }
 
-test();
+test("https://sushiscan.net/catalogue/my-hero-academia/");
+
+async function getPageNumber(page, chapterUrl) {
+    await page.goto(chapterUrl, { waitUntil: "networkidle2" });
+    const pagesListView = await page.$$('#select-paged option');
+
+    var nb = 0;
+    for (var elmnt in pagesListView) {
+        let option = pagesListView[elmnt];
+        nb = await page.evaluate(option => option.value, option);
+    }
+    nb = parseInt(nb) + 1;
+    return nb;
+}
+
+async function getPage(page) {
+    const img = await page.$('#readerarea img');
+    const imgText = await page.evaluate(img => img.src, img);
+    return imgText;
+}
+
+async function getAllChapter(urlPage, page) {
+    await page.goto(urlPage, { waitUntil: "networkidle2" });
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    var listUrlChapter = [];
+
+    const listChapElement = await page.$$('#chapterlist ul li');
+    for (var elmnt of listChapElement) {
+        let element = await elmnt.$('div div a');
+        let res = await page.evaluate(element => element.href, element);
+        listUrlChapter.push(res);
+    }
+    return listUrlChapter;
+}
