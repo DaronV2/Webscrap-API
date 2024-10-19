@@ -80,10 +80,12 @@ class MangaCreator{
             const newImgText = imgText.replace(re, (match, p1) => {
             return `${i}.`;
             });
+            // console.log(newImgText);
             const newImgObj = new PageUrl(newImgText, i-1);
             listUrl.push(newImgObj);
         }
         var chapObj = new MangaChapter(mangaName,listUrl);
+        // console.log({nom : chapObj.chapterName, pages : chapObj.listUrlOfChapter});
         return chapObj;
     }
 
@@ -111,7 +113,3 @@ class MangaCreator{
     }
 }
 module.exports = MangaCreator;
-
-var init = new MangaCreator("https://sushiscan.net/catalogue/naruto/");
-init.createManga();
-console.log(init);
