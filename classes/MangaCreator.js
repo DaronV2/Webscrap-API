@@ -76,6 +76,7 @@ class MangaCreator{
         var listUrl = [];
         const img = await page.$('#readerarea img');
         const imgText = await page.evaluate(img => img.src, img);
+        // console.log(imgText);
         const re = /(\d+)\./;
         var mangaName = "";
         for (var i = 1; i <=nbPages ; i++){
@@ -92,7 +93,6 @@ class MangaCreator{
             listUrl.push(newImgObj);
         }
         var chapObj = new MangaChapter(mangaName,listUrl);
-        //console.log({nom : chapObj.chapterName, pages : chapObj.listUrlOfChapter});
         return chapObj;
     }
 
