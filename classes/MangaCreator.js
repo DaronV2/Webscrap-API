@@ -39,6 +39,7 @@ class MangaCreator{
 
         });
         const listChapter = await this.getAllChapter(this.urlManga, page);
+        const nomManga = await this.getMangaName(page);
         var listChap = [];
 
         for (var chapterUrlIndex in listChapter){
@@ -47,7 +48,7 @@ class MangaCreator{
             // console.log(imgs);
             listChap.push(imgs);
         }
-        const mangaObj = new Manga("naruto", listChap);
+        const mangaObj = new Manga(nomManga, listChap);
         return mangaObj;
     }
 
@@ -63,6 +64,12 @@ class MangaCreator{
         }
         nb = parseInt(nb) + 1;
         return nb;
+    }
+
+    async getMangaName(page){
+        const elementMangaName = await page.$('h1.entry-title');
+        const mangaName = await page.evaluate(elementMangaName => elementMangaName.textContent, elementMangaName)
+        return mangaName;
     }
 
     async getAllPages(page,chapUrl,nbPages) {
@@ -85,7 +92,7 @@ class MangaCreator{
             listUrl.push(newImgObj);
         }
         var chapObj = new MangaChapter(mangaName,listUrl);
-        // console.log({nom : chapObj.chapterName, pages : chapObj.listUrlOfChapter});
+        //console.log({nom : chapObj.chapterName, pages : chapObj.listUrlOfChapter});
         return chapObj;
     }
 
@@ -109,7 +116,7 @@ class MangaCreator{
             let res = await page.evaluate(element => element.href, element);
             listUrlChapter.push(res);
         }
-        return listUrlChapter;
+        return listUrlChapter.reverse();
     }
 }
 module.exports = MangaCreator;
