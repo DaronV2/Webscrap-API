@@ -8,13 +8,21 @@ const MangaCreator = require('./classes/MangaCreator');
 const app = express()
 const port = 30001
 
+let db;
+
 // Créer une connexion MySQL
-const db = mysql.createPool({
-    host: 'localhost',      // L'hôte MySQL (souvent 'localhost')
-    user: 'root',           // Nom d'utilisateur MySQL
-    password: 'root',           // Mot de passe MySQL (mettre votre propre mot de passe)
-    database: 'api'      // Nom de la base de données que vous avez créée
-});
+try {
+    db = mysql.createPool({
+        host: 'localhost',      // L'hôte MySQL (souvent 'localhost')
+        port: 3307,
+        user: 'root',           // Nom d'utilisateur MySQL
+        password: 'root',           // Mot de passe MySQL (mettre votre propre mot de passe)
+        database: 'api'      // Nom de la base de données que vous avez créée
+    });
+} catch (e){
+    console.log(e);
+}
+
 
 app.use(express.json());
 app.use(cors());
@@ -30,8 +38,8 @@ app.get('/:manga', async (req, res) => {
                 res.status(200).json({ result: result });
             }
         } catch (err) {
-            console.log(err);
-            res.status(404).json({ result: "error" });
+            console.log(err.message);
+            res.status(404).json({ result: "error !!!" });
         }
     } else {
         try {
@@ -44,7 +52,7 @@ app.get('/:manga', async (req, res) => {
             }
         } catch (err) {
             console.log(err);
-            res.status(404).json({ result: "error" });
+            res.status(404).json({ result: "error !!" });
         }
     }
 });
