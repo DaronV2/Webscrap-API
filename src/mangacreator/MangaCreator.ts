@@ -1,5 +1,4 @@
 import { connect, PageWithCursor } from 'puppeteer-real-browser';
-import { Page } from 'playwright';
 import { PageUrl } from './PageUrl';
 import { MangaChapter } from './MangaChapter';
 import { Manga } from './Manga';

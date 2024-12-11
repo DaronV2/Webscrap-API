@@ -1,7 +1,6 @@
 // Importing all the libs useful for the code
 import Fastify, { fastify } from 'fastify'
-import cors from "cors";
-import mysql, { RowDataPacket } from "mysql2/promise";
+import { RowDataPacket } from "mysql2/promise";
 import dotenv from "dotenv";
 import { MySQL } from './dbHandler/db';
 import {MangaListItem} from './Objects/mangaListItem';
