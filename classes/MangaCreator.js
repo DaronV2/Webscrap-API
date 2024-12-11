@@ -42,13 +42,11 @@ class MangaCreator{
         const nomManga = await this.getMangaName(page);
         var listChap = [];
 
-        var chapterIndex = 1;
         for (var chapterUrlIndex in listChapter){
             var nb = await this.getPageNumber(page, listChapter[chapterUrlIndex]);
-            var imgs = await this.getAllPages(page, listChapter[chapterUrlIndex],nb, chapterIndex);
+            var imgs = await this.getAllPages(page, listChapter[chapterUrlIndex],nb);
             // console.log(imgs);
             listChap.push(imgs);
-            chapterIndex++;
         }
         const mangaObj = new Manga(nomManga, listChap);
         return mangaObj;
@@ -74,7 +72,7 @@ class MangaCreator{
         return mangaName;
     }
 
-    async getAllPages(page,chapUrl,nbPages, chapterIndex) {
+    async getAllPages(page,chapUrl,nbPages) {
         var listUrl = [];
         const img = await page.$('#readerarea img');
         const imgText = await page.evaluate(img => img.src, img);
@@ -94,7 +92,7 @@ class MangaCreator{
             const newImgObj = new PageUrl(newImgText, i-1);
             listUrl.push(newImgObj);
         }
-        var chapObj = new MangaChapter(mangaName,listUrl, chapterIndex);
+        var chapObj = new MangaChapter(mangaName,listUrl);
         return chapObj;
     }
 

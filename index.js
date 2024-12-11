@@ -113,7 +113,7 @@ app.post('/', async (req, res) => {
     });
 
     for (const chapter of listeChap) {
-        const [res] = await db.execute("INSERT INTO manga_chapter(nom_chapter, fk_id_manga, chapter_index) VALUES (?, ?);", [chapter.chapterName, mangaId, chapter.chapterIndex]);
+        const [res] = await db.execute("INSERT INTO manga_chapter(nom_chapter, fk_id_manga) VALUES (?, ?);", [chapter.chapterName, mangaId]);
         console.log(`inseré avec id : ${res.insertId}, nom : ${chapter.chapterName}`);
         const list = chapter.listUrlOfChapter
         for (const url in list) {
