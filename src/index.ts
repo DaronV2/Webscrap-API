@@ -1,5 +1,5 @@
 // Importing all the libs useful for the code
-import Fastify, { fastify } from 'fastify'
+import Fastify, { fastify } from 'fastify';
 import { RowDataPacket } from "mysql2/promise";
 import dotenv from "dotenv";
 import { MySQL } from './dbHandler/db';
@@ -11,10 +11,10 @@ const server = fastify();
 
 // Initialize connexion to db
 const db = new MySQL({
-    host: 'localhost',      // L'hôte MySQL (souvent 'localhost')
-    user: 'root',           // Nom d'utilisateur MySQL
-    password: 'root',           // Mot de passe MySQL (mettre votre propre mot de passe)
-    database: 'api'      // Nom de la base de données que vous avez créée
+    host: process.env.MYSQL_ADDRESS,      // L'hôte MySQL 
+    user: process.env.MYSQL_USER,           // Nom d'utilisateur MySQL
+    password: process.env.MYSQL_PASSWORD,           // Mot de passe MySQL (mettre votre propre mot de passe)
+    database: process.env.MYSQL_DB_NAME     // Nom de la base de données que vous avez créée
 });
   
 // Launching API server
