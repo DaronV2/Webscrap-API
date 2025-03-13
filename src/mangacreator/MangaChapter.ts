@@ -1,6 +1,11 @@
-const PageUrl = require("./PageUrl");
+import { PageUrl } from "./PageUrl";
 
-class MangaChapter{
+export class MangaChapter{
+
+    chapterName : string;
+    listUrlOfChapter : Array<PageUrl>;
+    chapterIndex : number;
+    
     /**
      * Represents a book.
      * @constructor
@@ -8,10 +13,9 @@ class MangaChapter{
      * @param {Array<PageUrl>} listUrlOfChapter - The author of the book.
      * @param {number} chapterIndex - The chapter index.
      */
-    constructor(chapterName, listUrlOfChapter){
+    constructor(chapterName : string, listUrlOfChapter : Array<PageUrl>, chapterIndex : number){
         this.chapterName = chapterName; // nom du chapitre
         this.listUrlOfChapter = listUrlOfChapter; // array des url d'un chapitre
-        this.chapterIndex = chapterIndex; // array des url d'un chapitre
+        this.chapterIndex = chapterIndex; // Index du chapitre
     }
 }
-module.exports = MangaChapter;
