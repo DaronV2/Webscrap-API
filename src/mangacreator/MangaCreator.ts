@@ -2,12 +2,14 @@ import { connect, PageWithCursor } from 'puppeteer-real-browser';
 import { PageUrl } from './PageUrl';
 import { MangaChapter } from './MangaChapter';
 import { Manga } from './Manga';
+import * as fs from 'fs';
+import axios from 'axios';
 
-export class MangaCreator{
+export class MangaCreator {
 
-    urlManga : string;
+    urlManga: string;
 
-    constructor (urlManga : string){
+    constructor(urlManga: string) {
         this.urlManga = urlManga;
     }
 
@@ -30,22 +32,22 @@ export class MangaCreator{
         if (nomManga) {
             var listChap = [];
             var chapterIndex = 1;
-            for (const chapterUrlIndex in listChapter){
+            for (const chapterUrlIndex in listChapter) {
                 const nb = await this.getPageNumber(page, listChapter[chapterUrlIndex]);
                 const imgs = await this.getAllPages(page, listChapter[chapterUrlIndex], nb, chapterIndex) as MangaChapter;
                 listChap.push(imgs);
                 chapterIndex++;
             }
-            if(listChap){
+            if (listChap) {
                 const mangaObj = new Manga(nomManga, listChap);
                 return mangaObj;
             }
-        } else{
+        } else {
             console.log("Le nom du manga n'a pas été trouvé :/");
         }
     }
 
-    async getAllChapter(urlManga : string , page : PageWithCursor) {
+    async getAllChapter(urlManga: string, page: PageWithCursor) {
         await page.goto(urlManga, { waitUntil: "networkidle2" });
         await new Promise(resolve => setTimeout(resolve, 1500));
         var listUrlChapter = [];
@@ -53,7 +55,7 @@ export class MangaCreator{
         const chapterName = await page.$('#chapterlist ul li div div a .chapternum');
         for (var elmnt of listChapElement) {
             let element = await elmnt.$('div div a');
-            if (element){
+            if (element) {
                 let res = await page.evaluate(element => element.href, element);
                 listUrlChapter.push(res);
             }
@@ -61,16 +63,16 @@ export class MangaCreator{
         return listUrlChapter.reverse();
     }
 
-    async getMangaName(page : PageWithCursor){
+    async getMangaName(page: PageWithCursor) {
         const elementMangaName = await page.$('h1.entry-title');
-        if (elementMangaName){
+        if (elementMangaName) {
             const mangaName = await page.evaluate(elementMangaName => elementMangaName.textContent, elementMangaName)
             return mangaName;
         }
         return;
     }
 
-    async getPageNumber(page : PageWithCursor, chapterUrl : string) {
+    async getPageNumber(page: PageWithCursor, chapterUrl: string) {
         await page.goto(chapterUrl, { waitUntil: "networkidle2" });
         const pagesListView = await page.$$('#select-paged option');
 
@@ -84,18 +86,18 @@ export class MangaCreator{
         return res;
     }
 
-    async getAllPages(page : PageWithCursor, chapUrl : string , nbPages : number, chapterIndex : number) {
+    async getAllPages(page: PageWithCursor, chapUrl: string, nbPages: number, chapterIndex: number) {
         var listUrl = [];
         const img = await page.$('#readerarea img');
-        if(img){
+        if (img) {
             const imgText = await page.evaluate(img => img.src, img);
             // console.log(imgText);
             const re = /(\d+)\./;
             var mangaName;
-            for (var i = 1; i <=nbPages ; i++){
-                if (i == 1){
+            for (var i = 1; i <= nbPages; i++) {
+                if (i == 1) {
                     const elementMangaName = await page.$('.entry-title');
-                    if(elementMangaName){
+                    if (elementMangaName) {
                         mangaName = await page.evaluate(elementMangaName => elementMangaName.textContent, elementMangaName) as string;
                     }
                 }
@@ -103,23 +105,62 @@ export class MangaCreator{
                 const newImgText = imgText.replace(re, (match, p1) => {
                     return `${numberWithZeros}.`;
                 });
-                // console.log(newImgText);
-                const newImgObj = new PageUrl(newImgText, i-1);
+                console.log(newImgText);
+                // await this.downloadImage(newImgText, chapUrl + `${i - 1}`);
+                const newImgObj = new PageUrl(newImgText, i - 1);
                 listUrl.push(newImgObj);
             }
-            if( mangaName){
-                var chapObj = new MangaChapter(mangaName,listUrl, chapterIndex);
+            if (mangaName) {
+                var chapObj = new MangaChapter(mangaName, listUrl, chapterIndex);
                 return chapObj;
             }
         }
     }
 
-    addZeros(nb : number){
-        if (nb <10)
+    addZeros(nb: number) {
+        if (nb < 10)
             return `00${nb}`;
         if (nb >= 10 && nb < 100)
             return `0${nb}`;
         else
             return nb;
+    }
+
+    async downloadImage(url: string, filePath: string): Promise<void> {
+        const { browser, page } = await connect({
+            headless: false,
+            args: [],
+            customConfig: {},
+            turnstile: true,
+            connectOption: {},
+            disableXvfb: false,
+            ignoreAllFlags: false
+        });
+
+        const viewSource = await page.goto(url, { waitUntil: "networkidle2" });
+        if (viewSource) {
+            try {
+                // console.log(viewSource.headers());
+                const buffer = await viewSource.buffer();
+                fs.writeFileSync("testt.html", buffer);
+                return;
+            } catch (error) {
+                console.log(error);
+                return;
+            }
+        }
+        console.log(("non"));
+
+        // await page.close();
+
+        // if (viewSource) {
+        //     fs.writeFile('test.html', viewSource, function (err) {
+        //         if (err) {
+        //             return console.log(err);
+        //         }
+
+        //         console.log('The file was saved!');
+        //     });
+        // }
     }
 }
