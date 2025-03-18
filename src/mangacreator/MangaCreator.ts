@@ -3,7 +3,6 @@ import { PageUrl } from './PageUrl';
 import { MangaChapter } from './MangaChapter';
 import { Manga } from './Manga';
 import * as fs from 'fs';
-import axios from 'axios';
 
 export class MangaCreator {
 
@@ -144,23 +143,11 @@ export class MangaCreator {
                 const buffer = await viewSource.buffer();
                 fs.writeFileSync("testt.html", buffer);
                 return;
-            } catch (error) {
+            } catch (error : any) {
                 console.log(error);
-                return;
+                return error;
             }
         }
         console.log(("non"));
-
-        // await page.close();
-
-        // if (viewSource) {
-        //     fs.writeFile('test.html', viewSource, function (err) {
-        //         if (err) {
-        //             return console.log(err);
-        //         }
-
-        //         console.log('The file was saved!');
-        //     });
-        // }
     }
 }
