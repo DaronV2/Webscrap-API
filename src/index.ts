@@ -12,7 +12,7 @@ const server = fastify();
 
 // Initialize connexion to db
 const db = new MySQL({
-  port: 3307,
+  port: parseInt(process.env.MYSQL_PORT ? process.env.MYSQL_PORT : "3306"),
   host: process.env.MYSQL_ADDRESS,      // L'hôte MySQL 
   user: process.env.MYSQL_USER,           // Nom d'utilisateur MySQL
   password: process.env.MYSQL_PASSWORD,           // Mot de passe MySQL (mettre votre propre mot de passe)
