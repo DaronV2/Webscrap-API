@@ -8,6 +8,7 @@ import {
     Pool,
     ResultSetHeader,
     RowDataPacket,
+    PoolConnection,
   } from 'mysql2/promise';
   
   export class MySQL {
@@ -76,4 +77,27 @@ import {
     get connection() {
       return this.conn;
     }
+
+    /**
+   * Execute a transaction
+   * @param operations An array of functions that return promises, each representing a database operation
+   */
+  async executeTransaction(operations: Array<(connection: PoolConnection) => Promise<any>>): Promise<void> {
+    const connection = await this.conn.getConnection();
+    try {
+      await connection.beginTransaction();
+
+      for (const operation of operations) {
+        await operation(connection);
+      }
+
+      await connection.commit();
+    } catch (error) {
+      await connection.rollback();
+      console.error('Transaction failed, rolled back.', error);
+      throw error;
+    } finally {
+      connection.release();
+    }
+  }
   }
