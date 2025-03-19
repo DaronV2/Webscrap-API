@@ -6,6 +6,7 @@ import * as fs from 'fs';
 import * as cheerio from 'cheerio';
 import axios, { AxiosResponse } from 'axios'
 import path, { extname } from 'path';
+import { data } from 'cheerio/dist/commonjs/api/attributes';
 
 export class MangaCreator {
 
@@ -146,17 +147,26 @@ export class MangaCreator {
             const imgSrc = ele.attribs['src'];
             if(imgSrc == undefined){ console.log("pas image"); }
             const ext = extname(imgSrc);
-            axios.get(imgSrc,{
-                proxy: {
-                    host: "127.0.0.1/v1",
-                    port: 8191,
+            const url = 'http://localhost:8191/v1';
+            const data = {
+                cmd: 'request.get',
+                url: imgSrc,
+                maxTimeout: 60000
+            };
+
+            axios.post(url, data, {
+                headers: {
+                    'Content-Type': 'application/json'
                 },
-                responseType: 'stream',
-            }).then((res : AxiosResponse<any,any>)=> {
-                res.data.pip(fs.createWriteStream(path.join("./imgs",`img-${idx}${ext}`)))
-            }).catch((err : any) => {
-                console.log(err);
+                responseType : 'stream'
             })
+            .then(response => {
+                response.data.pipe(fs.createWriteStream(path.join('./imgs',`img-${idx}${ext}`)));
+                console.log("ouiii");
+            })
+            .catch(error => {
+                console.log('Error:', error);
+            });
         });
         // if (viewSource) {
         //     try {
