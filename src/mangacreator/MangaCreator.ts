@@ -4,7 +4,7 @@ import { MangaChapter } from './MangaChapter';
 import { Manga } from './Manga';
 import * as fs from 'fs';
 import * as cheerio from 'cheerio';
-import axios from 'axios'
+import axios, { AxiosResponse } from 'axios'
 import path, { extname } from 'path';
 
 export class MangaCreator {
@@ -142,7 +142,7 @@ export class MangaCreator {
         await page.goto(url, { waitUntil: "networkidle2" });
         const $ = cheerio.load(await page.content());
         // console.log($('body > img'));
-        $('body > img').each((idx,ele) => {
+        $('body > img').each((idx : any,ele : any) => {
             const imgSrc = ele.attribs['src'];
             if(imgSrc == undefined){ console.log("pas image"); }
             const ext = extname(imgSrc);
@@ -152,9 +152,9 @@ export class MangaCreator {
                     port: 8191,
                 },
                 responseType: 'stream',
-            }).then(res => {
+            }).then((res : AxiosResponse<any,any>)=> {
                 res.data.pip(fs.createWriteStream(path.join("./imgs",`img-${idx}${ext}`)))
-            }).catch(err => {
+            }).catch((err : any) => {
                 console.log(err);
             })
         });
