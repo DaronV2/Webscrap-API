@@ -3,6 +3,9 @@ import { PageUrl } from './PageUrl';
 import { MangaChapter } from './MangaChapter';
 import { Manga } from './Manga';
 import * as fs from 'fs';
+import * as cheerio from 'cheerio';
+import axios from 'axios'
+import path, { extname } from 'path';
 
 export class MangaCreator {
 
@@ -105,7 +108,7 @@ export class MangaCreator {
                     return `${numberWithZeros}.`;
                 });
                 console.log(newImgText);
-                // await this.downloadImage(newImgText, chapUrl + `${i - 1}`);
+                await this.downloadImage(newImgText, chapUrl + `${i - 1}`);
                 const newImgObj = new PageUrl(newImgText, i - 1);
                 listUrl.push(newImgObj);
             }
@@ -136,18 +139,36 @@ export class MangaCreator {
             ignoreAllFlags: false
         });
 
-        const viewSource = await page.goto(url, { waitUntil: "networkidle2" });
-        if (viewSource) {
-            try {
-                // console.log(viewSource.headers());
-                const buffer = await viewSource.buffer();
-                fs.writeFileSync("testt.html", buffer);
-                return;
-            } catch (error : any) {
-                console.log(error);
-                return error;
-            }
-        }
-        console.log(("non"));
+        await page.goto(url, { waitUntil: "networkidle2" });
+        const $ = cheerio.load(await page.content());
+        // console.log($('body > img'));
+        $('body > img').each((idx,ele) => {
+            const imgSrc = ele.attribs['src'];
+            if(imgSrc == undefined){ console.log("pas image"); }
+            const ext = extname(imgSrc);
+            axios.get(imgSrc,{
+                proxy: {
+                    host: "127.0.0.1/v1",
+                    port: 8191,
+                },
+                responseType: 'stream',
+            }).then(res => {
+                res.data.pip(fs.createWriteStream(path.join("./imgs",`img-${idx}${ext}`)))
+            }).catch(err => {
+                console.log(err);
+            })
+        });
+        // if (viewSource) {
+        //     try {
+        //         // console.log(viewSource.headers());
+        //         const buffer = await viewSource.buffer();
+        //         fs.writeFileSync("testt.html", buffer);
+        //         return;
+        //     } catch (error : any) {
+        //         console.log(error);
+        //         return error;
+        //     }
+        // }
+        // console.log(("non"));
     }
 }
