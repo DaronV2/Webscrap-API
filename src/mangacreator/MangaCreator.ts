@@ -153,7 +153,7 @@ export class MangaCreator {
                 },
                 responseType: 'stream',
             }).then((res : AxiosResponse<any,any>)=> {
-                res.data.pip(fs.createWriteStream(path.join("./imgs",`img-${idx}${ext}`)))
+                res.data.pipe(fs.createWriteStream(path.join("./imgs",`img-${idx}${ext}`)))
             }).catch((err : any) => {
                 console.log(err);
             })
