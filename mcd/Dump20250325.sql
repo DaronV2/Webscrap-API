@@ -1,10 +1,10 @@
 CREATE DATABASE  IF NOT EXISTS `api` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
 USE `api`;
--- MySQL dump 10.13  Distrib 8.0.38, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.36, for Win64 (x86_64)
 --
--- Host: 127.0.0.1    Database: api
+-- Host: localhost    Database: api
 -- ------------------------------------------------------
--- Server version	8.4.3
+-- Server version	8.3.0
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -28,7 +28,7 @@ CREATE TABLE `manga` (
   `id_Manga` int NOT NULL AUTO_INCREMENT,
   `nom_Manga` varchar(45) NOT NULL,
   PRIMARY KEY (`id_Manga`)
-) ENGINE=InnoDB AUTO_INCREMENT=59 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=66 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -46,7 +46,7 @@ CREATE TABLE `manga_chapter` (
   PRIMARY KEY (`idmanga_chapter`),
   KEY `fk_id_manga_idx` (`fk_id_manga`),
   CONSTRAINT `fk_id_manga` FOREIGN KEY (`fk_id_manga`) REFERENCES `manga` (`id_Manga`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=118 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=130 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -61,11 +61,12 @@ CREATE TABLE `manga_chapter_url` (
   `url` varchar(100) NOT NULL,
   `index` int NOT NULL,
   `fk_id_manga_chapter` int NOT NULL,
+  `path` varchar(100) DEFAULT NULL,
   `downloaded` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`idmanga_chapter_url`),
   KEY `fk_id_manga_chapter_idx` (`fk_id_manga_chapter`),
   CONSTRAINT `fk_id_manga_chapter` FOREIGN KEY (`fk_id_manga_chapter`) REFERENCES `manga_chapter` (`idmanga_chapter`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=19543 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=20935 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -77,4 +78,4 @@ CREATE TABLE `manga_chapter_url` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-03-25 20:00:24
+-- Dump completed on 2025-03-25 21:43:09
