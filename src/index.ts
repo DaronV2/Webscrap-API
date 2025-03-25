@@ -115,7 +115,7 @@ server.post('/mangaCreate', async (request, reply) => {
           let tabOfValues = [];
           for (const url in list) {
             console.log(`IdManga : ${idManga.insertId}, idChap : ${res.insertId}, index : ${list[url].index} `);
-            tabOfValues.push([list[url].url, list[url].index, res.insertId, `${idManga.insertId}/${res.insertId}/${list[url].index}.png`]);
+            tabOfValues.push([list[url].url, list[url].index, res.insertId, `${process.env.IMAGES_FOLDER}/${idManga.insertId}/${res.insertId}/${list[url].index}.png`]);
           }
           try {
             await db.queryResults("INSERT INTO manga_chapter_url(url, manga_chapter_url.index ,fk_id_manga_chapter, path) VALUES ?;", [tabOfValues]);
