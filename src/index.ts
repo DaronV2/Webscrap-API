@@ -6,9 +6,12 @@ import { MySQL } from './dbHandler/db';
 import { MangaListItem } from './Objects/mangaListItem';
 import { MangaCreator } from './mangacreator/MangaCreator';
 import { MangaChapter } from './mangacreator/MangaChapter';
+import { exec } from 'child_process';
+import { promisify } from 'util';
 
 dotenv.config();
 const server = fastify();
+const execPromise = promisify(exec);
 
 // Initialize connexion to db
 const db = new MySQL({
@@ -50,7 +53,7 @@ server.get('/mangas/:manga', async (request, reply) => {
   if (!manga) {
     return reply.code(400).send({ result: "Invalid manga ID provided.", success: false });
   } try {
-    const [result] = await db.queryRows("SELECT nom_Manga, mc.nom_chapter FROM api.manga JOIN api.manga_chapter mc ON id_Manga = mc.fk_id_manga WHERE id_Manga = (?);", [manga]);
+    const [result] = await db.queryRows("SELECT nom_Manga, mc.nom_chapter, mc.idmanga_chapter FROM api.manga JOIN api.manga_chapter mc ON id_Manga = mc.fk_id_manga WHERE id_Manga = (?);", [manga]);
     if (result.length === 0 && result) {
       return reply.code(404).send({ result: "Il faut rechercher le manga par son ID, pour le trouver entrez 'mangalist' en param. Le manga n'existe pas, veuillez le créer en suivant la procédure ici : ", success: false });
     } else {
@@ -63,11 +66,11 @@ server.get('/mangas/:manga', async (request, reply) => {
 });
 
 // Replying the chapter datas thanks to the params : mangaId, ChapterIndex
-server.get('/:idManga/:chapterName', async (request, reply) => {
+server.get('/mangas/:idManga/:chapterId', async (request, reply) => {
   const { idManga } = request.params as { idManga: number };
-  const { chapterName } = request.params as { chapterName: string };
+  const { chapterId } = request.params as { chapterId: string };
   try {
-    const [result] = await db.queryRows("SELECT nom_chapter, mcu.url, mcu.`index` FROM manga_chapter JOIN manga_chapter_url mcu ON idmanga_chapter = mcu.fk_id_manga_chapter WHERE fk_id_manga = (?) AND nom_chapter = (?);", [idManga, chapterName]);
+    const [result] = await db.queryRows("SELECT nom_chapter, mcu.url, mcu.`index` FROM manga_chapter JOIN manga_chapter_url mcu ON idmanga_chapter = mcu.fk_id_manga_chapter WHERE fk_id_manga = (?) AND idmanga_chapter = (?);", [idManga, chapterId]);
     if (result.length == 0) {
       return reply.code(404).send({ result: "Le chapitre n'existe pas", success: false });
     } else {
@@ -111,10 +114,11 @@ server.post('/mangaCreate', async (request, reply) => {
           const list = chapter.listUrlOfChapter;
           let tabOfValues = [];
           for (const url in list) {
-            tabOfValues.push([list[url].url, list[url].index, res.insertId]);
+            console.log(`IdManga : ${idManga.insertId}, idChap : ${res.insertId}, index : ${list[url].index} `);
+            tabOfValues.push([list[url].url, list[url].index, res.insertId, `${idManga.insertId}/${res.insertId}/${list[url].index}.png`]);
           }
           try {
-            await db.queryResults("INSERT INTO manga_chapter_url(url, manga_chapter_url.index ,fk_id_manga_chapter) VALUES ?;", [tabOfValues]);
+            await db.queryResults("INSERT INTO manga_chapter_url(url, manga_chapter_url.index ,fk_id_manga_chapter, path) VALUES ?;", [tabOfValues]);
           } catch (e: any) {
             return reply.code(404).send({ error: e, success: false });
           }
@@ -123,6 +127,10 @@ server.post('/mangaCreate', async (request, reply) => {
         }
 
       };
+      fetch('http://127.0.0.1:30002/download')
+      .catch(error => {
+        console.error('There has been a problem with your fetch operation:', error);
+      });
       return reply.status(200).send({ resultat: "Manga bien ajouté", success: true });
     }
   }
