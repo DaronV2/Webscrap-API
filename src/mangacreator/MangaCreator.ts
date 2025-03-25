@@ -2,14 +2,11 @@ import { connect, PageWithCursor } from 'puppeteer-real-browser';
 import { PageUrl } from './PageUrl';
 import { MangaChapter } from './MangaChapter';
 import { Manga } from './Manga';
-import { exec } from 'child_process';
-import { promisify } from 'util';
 
 export class MangaCreator {
 
     urlManga: string;
 
-    execPromise = promisify(exec);
 
     constructor(urlManga: string) {
         this.urlManga = urlManga;
@@ -130,16 +127,4 @@ export class MangaCreator {
             return nb;
     }
 
-    // async downloadImage(url: string, filePath: string): Promise<void>{
-    //     try {
-    //         const result = await this.execPromise(`python py/CloudflareBypassForScraping/index.py ${url} ${this.removeSpaces(filePath)}`);
-    //         console.log(result);
-    //     } catch (error) {
-    //         console.error(`Exception: ${error}`);
-    //     }
-    // }
-
-    // removeSpaces(str : string) {
-    //     return str.replace(/\s+/g, '');
-    // }
 }
