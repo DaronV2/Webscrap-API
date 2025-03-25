@@ -4,12 +4,12 @@ import sys
 
 def download(url: str, path : str):
     options = ChromiumOptions()
-    options.headless()
+    # options.headless()
     driver = ChromiumPage(options)
     driver.get(url)
     cf_bypasser = CloudflareBypasser(driver)
     cf_bypasser.bypass()
-    img = driver._find_elements(('css selector', 'img'))
+    img = driver._find_elements(('css selector', 'body > img'))
     if img:
         img.get_screenshot(path)
         driver.quit()
