@@ -23,6 +23,6 @@
   },
   "scripts": {
     "script": "tsc && node dist/index.js",
-    "download": "tsc && node dist/test.js && python py/CloudflareBypassForScraping/index.py"
+    "download": "tsc && node dist/test.js"
   }
 }
