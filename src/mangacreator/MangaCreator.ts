@@ -2,15 +2,14 @@ import { connect, PageWithCursor } from 'puppeteer-real-browser';
 import { PageUrl } from './PageUrl';
 import { MangaChapter } from './MangaChapter';
 import { Manga } from './Manga';
-import * as fs from 'fs';
-import * as cheerio from 'cheerio';
-import axios, { AxiosResponse } from 'axios'
-import path, { extname } from 'path';
-import { data } from 'cheerio/dist/commonjs/api/attributes';
+import { exec } from 'child_process';
+import { promisify } from 'util';
 
 export class MangaCreator {
 
     urlManga: string;
+
+    execPromise = promisify(exec);
 
     constructor(urlManga: string) {
         this.urlManga = urlManga;
@@ -37,15 +36,17 @@ export class MangaCreator {
             var chapterIndex = 1;
             for (const chapterUrlIndex in listChapter) {
                 const nb = await this.getPageNumber(page, listChapter[chapterUrlIndex]);
-                const imgs = await this.getAllPages(page, listChapter[chapterUrlIndex], nb, chapterIndex) as MangaChapter;
+                const imgs = await this.getAllPages(page, listChapter[chapterUrlIndex], nb, chapterIndex, nomManga) as MangaChapter;
                 listChap.push(imgs);
                 chapterIndex++;
             }
             if (listChap) {
                 const mangaObj = new Manga(nomManga, listChap);
+                page.close();
                 return mangaObj;
             }
         } else {
+            page.close();
             console.log("Le nom du manga n'a pas été trouvé :/");
         }
     }
@@ -89,7 +90,7 @@ export class MangaCreator {
         return res;
     }
 
-    async getAllPages(page: PageWithCursor, chapUrl: string, nbPages: number, chapterIndex: number) {
+    async getAllPages(page: PageWithCursor, chapUrl: string, nbPages: number, chapterIndex: number, nomManga : string) {
         var listUrl = [];
         const img = await page.$('#readerarea img');
         if (img) {
@@ -108,8 +109,8 @@ export class MangaCreator {
                 const newImgText = imgText.replace(re, (match, p1) => {
                     return `${numberWithZeros}.`;
                 });
-                console.log(newImgText);
-                await this.downloadImage(newImgText, chapUrl + `${i - 1}`);
+                // console.log(`${nomManga}/${chapterIndex}/${i - 1}.png`);
+                // await this.downloadImage(newImgText, `${nomManga}/${chapterIndex}/${i - 1}.png`);
                 const newImgObj = new PageUrl(newImgText, i - 1);
                 listUrl.push(newImgObj);
             }
@@ -129,56 +130,16 @@ export class MangaCreator {
             return nb;
     }
 
-    async downloadImage(url: string, filePath: string): Promise<void> {
-        const { browser, page } = await connect({
-            headless: false,
-            args: [],
-            customConfig: {},
-            turnstile: true,
-            connectOption: {},
-            disableXvfb: false,
-            ignoreAllFlags: false
-        });
+    // async downloadImage(url: string, filePath: string): Promise<void>{
+    //     try {
+    //         const result = await this.execPromise(`python py/CloudflareBypassForScraping/index.py ${url} ${this.removeSpaces(filePath)}`);
+    //         console.log(result);
+    //     } catch (error) {
+    //         console.error(`Exception: ${error}`);
+    //     }
+    // }
 
-        await page.goto(url, { waitUntil: "networkidle2" });
-        const $ = cheerio.load(await page.content());
-        // console.log($('body > img'));
-        $('body > img').each((idx : any,ele : any) => {
-            const imgSrc = ele.attribs['src'];
-            if(imgSrc == undefined){ console.log("pas image"); }
-            const ext = extname(imgSrc);
-            const url = 'http://localhost:8191/v1';
-            const data = {
-                cmd: 'request.get',
-                url: imgSrc,
-                maxTimeout: 60000
-            };
-
-            axios.post(url, data, {
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                responseType : 'stream'
-            })
-            .then(response => {
-                response.data.pipe(fs.createWriteStream(path.join('./imgs',`img-${idx}${ext}`)));
-                console.log("ouiii");
-            })
-            .catch(error => {
-                console.log('Error:', error);
-            });
-        });
-        // if (viewSource) {
-        //     try {
-        //         // console.log(viewSource.headers());
-        //         const buffer = await viewSource.buffer();
-        //         fs.writeFileSync("testt.html", buffer);
-        //         return;
-        //     } catch (error : any) {
-        //         console.log(error);
-        //         return error;
-        //     }
-        // }
-        // console.log(("non"));
-    }
+    // removeSpaces(str : string) {
+    //     return str.replace(/\s+/g, '');
+    // }
 }
