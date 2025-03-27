@@ -6,11 +6,15 @@ def download(url: str, path : str):
     options = ChromiumOptions()
     options.set_argument('--window-size', '1920,1080')
     options.set_argument('--no-sandbox')
-    options.headless()
+    options.set_argument("--lang=en")
+    # options.headless()
     driver = ChromiumPage(options)
     driver.get(url)
+    # print(driver.html);
     cf_bypasser = CloudflareBypasser(driver)
     cf_bypasser.bypass()
+    print(cf_bypasser.is_bypassed());
+    # print(driver.html);
     img = driver._find_elements(('css selector', 'body > img'))
     if img:
         img.get_screenshot(path)
