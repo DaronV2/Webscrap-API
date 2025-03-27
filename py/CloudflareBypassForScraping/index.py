@@ -4,7 +4,9 @@ import sys
 
 def download(url: str, path : str):
     options = ChromiumOptions()
-    # options.headless()
+    options.set_argument('--window-size', '1920,1080')
+    options.set_argument('--no-sandbox')
+    options.headless()
     driver = ChromiumPage(options)
     driver.get(url)
     cf_bypasser = CloudflareBypasser(driver)
@@ -21,17 +23,17 @@ def download(url: str, path : str):
     
 # script.py
 
-if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print("Usage: python script.py <url> <path>")
-        sys.exit(1)
+# if __name__ == "__main__":
+#     if len(sys.argv) != 3:
+#         print("Usage: python script.py <url> <path>")
+#         sys.exit(1)
 
-    url = str(sys.argv[1])
-    path = str(sys.argv[2])
-    result = download(url, path)
-    print(result)
+#     url = str(sys.argv[1])
+#     path = str(sys.argv[2])
+#     result = download(url, path)
+#     print(result)
     
-# download("https://sushiscan.net/wp-content/uploads6/KurokoNoBasketTome5-035.jpg")
+print(download("https://sushiscan.net/wp-content/uploads6/KurokoNoBasketTome5-035.jpg", "test.png"))
     
 
 
